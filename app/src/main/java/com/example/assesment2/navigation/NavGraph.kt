@@ -16,7 +16,7 @@ fun SetUpGraph(
         startDestination = MainScreen
     ) {
         composable<MainScreen>{
-            MainScreen(navController)
+            MainScreen()
         }
     }
 }

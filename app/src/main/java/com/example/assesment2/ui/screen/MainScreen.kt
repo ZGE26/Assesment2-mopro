@@ -1,7 +1,15 @@
 package com.example.assesment2.ui.screen
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -11,13 +19,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
+import androidx.compose.ui.unit.dp
 import com.example.assesment2.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(navHostController: NavHostController) {
+fun MainScreen() {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -30,6 +37,17 @@ fun MainScreen(navHostController: NavHostController) {
 
                 )
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {}
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = "Tambah Catatan",//Ganti sama string resource nanti
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
         }
     ) { innerPadding->
         ScreenContent(Modifier.padding(innerPadding))
@@ -37,16 +55,18 @@ fun MainScreen(navHostController: NavHostController) {
 }
 
 @Composable
-fun ScreenContent(modifier: Modifier) {
-    Text(
-        text = stringResource(R.string.app_name),
-        modifier = modifier,
-        color = MaterialTheme.colorScheme.primary
-    )
+fun ScreenContent(
+    modifier: Modifier
+) {
+    Column(
+        modifier = modifier.fillMaxSize().padding(8.dp)
+    ) {
+        Text("Testing")
+    }
 }
 
 @Preview
 @Composable
 fun MainScreenPreview() {
-    MainScreen(rememberNavController())
+    MainScreen()
 }
