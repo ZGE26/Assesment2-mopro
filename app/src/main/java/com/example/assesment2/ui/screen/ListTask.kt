@@ -25,9 +25,12 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -38,6 +41,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.assesment2.model.TaskList
+import com.example.assesment2.util.ViewModelFactory
 
 const val KEY_ID_TASK = "taskId"
 
@@ -50,8 +54,10 @@ fun ListTask(navController: NavHostController, id: Long) {
         mutableStateOf(TaskList(id = 0, title = "", description = "", date = "", halderId = id))
     }
 
-    val viewModel: ListViewModel = viewModel()
-    val taskList = viewModel.listTaskList
+    val context = LocalContext.current
+    val factory = ViewModelFactory(context)
+    val viewModel: ListViewModel = viewModel(factory = factory)
+    val taskList by viewModel.listTaskList.collectAsState()
 
     Scaffold(
         topBar = {

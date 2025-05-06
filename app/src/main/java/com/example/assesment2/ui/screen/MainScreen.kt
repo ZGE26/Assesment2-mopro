@@ -34,12 +34,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -55,13 +57,19 @@ import com.example.assesment2.R
 import com.example.assesment2.model.TaskHalder
 import com.example.assesment2.navigation.Screen
 import com.example.assesment2.ui.component.CreateTask
+import com.example.assesment2.util.ViewModelFactory
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(navController: NavHostController) {
     var showList by remember { mutableStateOf(true) }
-    var showDialog by remember { mutableStateOf(false) } // hanya satu di sini
+    var showDialog by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+    val factory = ViewModelFactory(context)
+    val viewModel: MainViewModel = viewModel(factory = factory)
+    val data by viewModel.halder.collectAsState()
 
     Scaffold(
         topBar = {
@@ -117,7 +125,6 @@ fun MainScreen(navController: NavHostController) {
                         }
                     }
 
-
                     FloatingActionButton(
                         onClick = { expanded = !expanded },
                         containerColor = MaterialTheme.colorScheme.primaryContainer
@@ -132,43 +139,43 @@ fun MainScreen(navController: NavHostController) {
             }
         }
     ) { innerPadding ->
-        ScreenContent(Modifier.padding(innerPadding), navController)
+        // Update ScreenContent with data
+        ScreenContent(Modifier.padding(innerPadding), navController, data)
 
         if (showDialog) {
             CreateTask(
                 onDismissRequest = { showDialog = false },
-                onConfirmation = {}
+                onConfirmation = { title, category ->
+                    viewModel.insert(title, category)
+                }
             )
         }
     }
 }
 
 @Composable
-fun ScreenContent(modifier: Modifier, navController: NavHostController) {
-    val viewModel: MainViewModel = viewModel()
-    val data = viewModel.halder
-
+fun ScreenContent(modifier: Modifier, navController: NavHostController, data: List<TaskHalder> = emptyList()) {
     var searchQuery by remember { mutableStateOf("") }
 
-    val filteredData = if (searchQuery.isBlank()) {
-        data
-    } else {
-        data.filter {
-            it.title.contains(searchQuery, ignoreCase = true) ||
-                    it.category.contains(searchQuery, ignoreCase = true)
-        }
+    // Filter data based on search query
+    val filteredData = data.filter {
+        it.title.contains(searchQuery, ignoreCase = true) ||
+                it.category.contains(searchQuery, ignoreCase = true)
     }
 
     Column(modifier = modifier.padding(16.dp)) {
+        // Search Input Field
         OutlinedTextField(
             value = searchQuery,
             onValueChange = { searchQuery = it },
             label = { Text("Cari tugas...") },
             singleLine = true,
-            trailingIcon = { Icon(
-                painter = painterResource(R.drawable.baseline_search_24),
-                contentDescription = "Search",
-            ) },
+            trailingIcon = {
+                Icon(
+                    painter = painterResource(R.drawable.baseline_search_24),
+                    contentDescription = "Search"
+                )
+            },
             shape = RoundedCornerShape(percent = 50),
             modifier = Modifier
                 .fillMaxWidth()
@@ -179,6 +186,7 @@ fun ScreenContent(modifier: Modifier, navController: NavHostController) {
             )
         )
 
+        // Display message if no data is found
         if (filteredData.isEmpty()) {
             Column(
                 modifier = Modifier
@@ -208,16 +216,16 @@ fun ScreenContent(modifier: Modifier, navController: NavHostController) {
     }
 }
 
-
 @Composable
 fun ListTask(taskHalder: TaskHalder, onClick: () -> Unit = {}) {
-    Row (
-        modifier = Modifier.fillMaxWidth()
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
             .clickable { onClick() }
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
-    ){
+    ) {
         Icon(
             painter = painterResource(R.drawable.baseline_notes_24),
             contentDescription = "Avatar",
@@ -240,9 +248,9 @@ fun ListTask(taskHalder: TaskHalder, onClick: () -> Unit = {}) {
     }
 }
 
-
 @Preview
 @Composable
 fun MainScreenPreview() {
     MainScreen(rememberNavController())
 }
+

@@ -43,7 +43,7 @@ import com.example.assesment2.R
 @Composable
 fun CreateTask(
     onDismissRequest: () -> Unit,
-    onConfirmation: (String) -> Unit
+    onConfirmation: (String, String) -> Unit
 ) {
     var titleState by remember { mutableStateOf(TextFieldValue("")) }
     var categryState by remember { mutableStateOf(TextFieldValue("")) }
@@ -86,7 +86,7 @@ fun CreateTask(
                                 IconButton(
                                     onClick = {
                                         if (titleState.text.isNotBlank() && categryState.text.isNotBlank()) {
-                                            onConfirmation(titleState.text)
+                                            onConfirmation(titleState.text, categryState.text)
                                             onDismissRequest()
                                         } else {
                                             Toast.makeText(
@@ -121,11 +121,12 @@ fun CreateTask(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         OutlinedTextField(
-                            value = titleState,
-                            onValueChange = { titleState = it },
-                            label = { Text("Kategory") },
+                            value = categryState,
+                            onValueChange = { categryState = it },
+                            label = { Text("Kategori") },
                             modifier = Modifier.fillMaxWidth()
                         )
+
                     }
                 }
             }
@@ -133,12 +134,13 @@ fun CreateTask(
     }
 }
 
-
 @Preview
 @Composable
 fun TaskJudulDialogPreview() {
     CreateTask(
         onDismissRequest = {},
-        onConfirmation = {}
+        onConfirmation = { title: String, categry: String ->
+            println("Task added: Title = $title, Category = $categry")
+        }
     )
 }

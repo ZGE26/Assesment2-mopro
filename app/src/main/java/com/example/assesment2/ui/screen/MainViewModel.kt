@@ -1,16 +1,33 @@
 package com.example.assesment2.ui.screen
 
-import com.example.assesment2.model.TaskHalder
 import androidx.lifecycle.ViewModel
-import com.example.assesment2.model.TaskList
+import androidx.lifecycle.viewModelScope
+import com.example.assesment2.database.TaskHalderDao
+import com.example.assesment2.model.TaskHalder
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
-class MainViewModel: ViewModel() {
-    val halder = listOf(
-        TaskHalder(1,"Harian", "Tugas Harian"),
-        TaskHalder(2,"Mingguan", "Tugas Mingguan"),
-        TaskHalder(3,"Bulanan", "Tugas Bulanan"),
-        TaskHalder(4,"Tahunan", "Tugas Tahunan"),
-        TaskHalder(5,"Tugas", "Tugas"),
-        TaskHalder(6,"Ujian", "Ujian"),
+class MainViewModel(private val dao: TaskHalderDao): ViewModel() {
+    val halder : StateFlow<List<TaskHalder>> = dao.getTaskHalder().stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(),
+        initialValue = emptyList()
     )
+
+    fun insert(title: String, categoty: String) {
+        val taskHalder = TaskHalder(
+            title = title,
+            category = categoty
+        )
+        viewModelScope.launch(Dispatchers.IO) {
+            dao.insertTaskHalder(taskHalder)
+        }
+    }
+
+    fun getTaskHalder(id: Long): TaskHalder? {
+        return null
+    }
 }
