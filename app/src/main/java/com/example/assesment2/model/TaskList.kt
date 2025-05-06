@@ -19,7 +19,6 @@ import androidx.room.ColumnInfo
 data class TaskList(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0L,
-
     var title: String,
     var description: String,
     var date: String,

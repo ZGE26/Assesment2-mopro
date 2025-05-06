@@ -115,6 +115,12 @@ fun ListTask(navController: NavHostController, id: Long) {
                 onDescriptionChange = { newTaskData.value = newTaskData.value.copy(description = it) },
                 onDateChange = { newTaskData.value = newTaskData.value.copy(date = it) },
                 onClick = {
+                    viewModel.insert(
+                        newTaskData.value.title,
+                        newTaskData.value.description,
+                        newTaskData.value.date,
+                        newTaskData.value.halderId
+                    )
                     newTaskDialogVisible.value = false
                 }
             )
