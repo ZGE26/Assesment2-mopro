@@ -27,4 +27,10 @@ class ListViewModel(private val dao: TaskListDao) : ViewModel() {
             dao.insertTask(taskList)
         }
     }
+
+    fun update(taskList: TaskList) {
+        viewModelScope.launch {
+            dao.updateTask(taskList)
+        }
+    }
 }

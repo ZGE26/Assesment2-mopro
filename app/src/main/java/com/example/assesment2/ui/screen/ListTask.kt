@@ -29,6 +29,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -95,17 +96,21 @@ fun ListTask(navController: NavHostController, id: Long) {
         )
 
         selectedTask.value?.let { task ->
+            var tempTask by remember { mutableStateOf(task) }
+
             DetailList(
-                task = task,
+                task = tempTask,
                 onDismiss = { selectedTask.value = null },
-                onTitleChange = { title -> task.title = title },
-                onDescriptionChange = { description -> task.description = description },
-                onDateChange = { date -> task.date = date },
+                onTitleChange = { tempTask = tempTask.copy(title = it) },
+                onDescriptionChange = { tempTask = tempTask.copy(description = it) },
+                onDateChange = { tempTask = tempTask.copy(date = it) },
                 onClick = {
+                    viewModel.update(tempTask)
                     selectedTask.value = null
                 }
             )
         }
+
 
         if (newTaskDialogVisible.value) {
             DetailList(
@@ -115,13 +120,15 @@ fun ListTask(navController: NavHostController, id: Long) {
                 onDescriptionChange = { newTaskData.value = newTaskData.value.copy(description = it) },
                 onDateChange = { newTaskData.value = newTaskData.value.copy(date = it) },
                 onClick = {
-                    viewModel.insert(
-                        newTaskData.value.title,
-                        newTaskData.value.description,
-                        newTaskData.value.date,
-                        newTaskData.value.halderId
-                    )
-                    newTaskDialogVisible.value = false
+                    if (newTaskData.value.title.isNotBlank() && newTaskData.value.description.isNotBlank() && newTaskData.value.date.isNotBlank()) {
+                        viewModel.insert(
+                            newTaskData.value.title,
+                            newTaskData.value.description,
+                            newTaskData.value.date,
+                            newTaskData.value.halderId
+                        )
+                        newTaskDialogVisible.value = false
+                    }
                 }
             )
         }
@@ -226,6 +233,9 @@ fun DetailList(
             color = MaterialTheme.colorScheme.surface,
             tonalElevation = 4.dp,
         ) {
+            var isTitleError by remember { mutableStateOf(false) }
+            var isDescriptionError by remember { mutableStateOf(false) }
+
             Scaffold(
                 topBar = {
                     TopAppBar(
@@ -239,25 +249,33 @@ fun DetailList(
                                 )
                             }
                         },
-                        colors = TopAppBarDefaults.mediumTopAppBarColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            titleContentColor = MaterialTheme.colorScheme.primary
-                        ),
                         actions = {
-                            IconButton(onClick = onClick) {
+                            IconButton(onClick = {
+                                isTitleError = task.title.isBlank()
+                                isDescriptionError = task.description.isBlank()
+
+                                if (!isTitleError && !isDescriptionError) {
+                                    onClick()
+                                }
+                            }) {
                                 Icon(
                                     imageVector = Icons.Filled.Check,
                                     contentDescription = "Save",
                                     tint = MaterialTheme.colorScheme.primary
                                 )
                             }
-                        }
+                        },
+                        colors = TopAppBarDefaults.mediumTopAppBarColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            titleContentColor = MaterialTheme.colorScheme.primary
+                        ),
                     )
                 }
             ) { paddingValues ->
                 Column(
                     modifier = Modifier
-                        .padding(paddingValues).padding(16.dp),
+                        .padding(paddingValues)
+                        .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Text(
@@ -268,15 +286,23 @@ fun DetailList(
 
                     OutlinedTextField(
                         value = task.title,
-                        onValueChange = { onTitleChange(it) },
+                        onValueChange = {
+                            isTitleError = false
+                            onTitleChange(it)
+                        },
                         label = { Text("Judul") },
+                        isError = isTitleError,
                         modifier = Modifier.fillMaxWidth()
                     )
 
                     OutlinedTextField(
                         value = task.description,
-                        onValueChange = { onDescriptionChange(it) },
+                        onValueChange = {
+                            isDescriptionError = false
+                            onDescriptionChange(it)
+                        },
                         label = { Text("Deskripsi") },
+                        isError = isDescriptionError,
                         modifier = Modifier.fillMaxWidth()
                     )
 
@@ -287,11 +313,11 @@ fun DetailList(
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
-
             }
         }
     }
 }
+
 
 @Preview
 @Composable
