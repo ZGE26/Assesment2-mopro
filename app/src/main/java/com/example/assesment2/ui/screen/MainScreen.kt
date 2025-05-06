@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -48,13 +49,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.assesment2.R
 import com.example.assesment2.model.TaskHalder
+import com.example.assesment2.navigation.Screen
 import com.example.assesment2.ui.component.CreateTask
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen() {
+fun MainScreen(navController: NavHostController) {
     var showList by remember { mutableStateOf(true) }
     var showDialog by remember { mutableStateOf(false) } // hanya satu di sini
 
@@ -127,7 +132,7 @@ fun MainScreen() {
             }
         }
     ) { innerPadding ->
-        ScreenContent(Modifier.padding(innerPadding))
+        ScreenContent(Modifier.padding(innerPadding), navController)
 
         if (showDialog) {
             CreateTask(
@@ -139,7 +144,7 @@ fun MainScreen() {
 }
 
 @Composable
-fun ScreenContent(modifier: Modifier) {
+fun ScreenContent(modifier: Modifier, navController: NavHostController) {
     val viewModel: MainViewModel = viewModel()
     val data = viewModel.halder
 
@@ -160,6 +165,11 @@ fun ScreenContent(modifier: Modifier) {
             onValueChange = { searchQuery = it },
             label = { Text("Cari tugas...") },
             singleLine = true,
+            trailingIcon = { Icon(
+                painter = painterResource(R.drawable.baseline_search_24),
+                contentDescription = "Search",
+            ) },
+            shape = RoundedCornerShape(percent = 50),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 8.dp),
@@ -187,7 +197,10 @@ fun ScreenContent(modifier: Modifier) {
                 contentPadding = PaddingValues(bottom = 84.dp)
             ) {
                 items(filteredData) {
-                    ListTask(taskHalder = it)
+                    ListTask(
+                        taskHalder = it,
+                        onClick = { navController.navigate(Screen.ListTask.passHalderId(it.id)) }
+                    )
                     HorizontalDivider()
                 }
             }
@@ -231,5 +244,5 @@ fun ListTask(taskHalder: TaskHalder, onClick: () -> Unit = {}) {
 @Preview
 @Composable
 fun MainScreenPreview() {
-    MainScreen()
+    MainScreen(rememberNavController())
 }
