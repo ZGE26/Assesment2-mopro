@@ -33,4 +33,16 @@ class ListViewModel(private val dao: TaskListDao) : ViewModel() {
             dao.updateTask(taskList)
         }
     }
+
+    fun deleteList(id: Long) {
+        viewModelScope.launch {
+            dao.deleteTaskById(id)
+        }
+    }
+
+    fun deleteAll(halderId: Long) {
+        viewModelScope.launch {
+            dao.deleteAll(halderId)
+        }
+    }
 }

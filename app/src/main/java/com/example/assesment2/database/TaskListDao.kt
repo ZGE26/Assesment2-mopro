@@ -20,4 +20,9 @@ interface TaskListDao {
     @Query("SELECT * FROM tasklist ORDER BY date DESC")
     fun getList(): Flow<List<TaskList>>
 
+    @Query("DELETE FROM tasklist WHERE id = :id")
+    suspend fun deleteTaskById(id: Long)
+
+    @Query("DELETE FROM tasklist WHERE halderId = :halderId")
+    suspend fun deleteAll(halderId: Long)
 }

@@ -17,4 +17,10 @@ interface TaskHalderDao {
 
     @Query("SELECT * FROM taskhalder ORDER BY id DESC")
     fun getTaskHalder(): Flow<List<TaskHalder>>
+
+    @Query("SELECT * FROM taskhalder WHERE id = :id")
+    suspend fun getTaskHalder(id: Long): TaskHalder?
+
+    @Query("DELETE FROM taskhalder WHERE id = :id")
+    suspend fun deleteTaskHalderById(id: Long)
 }

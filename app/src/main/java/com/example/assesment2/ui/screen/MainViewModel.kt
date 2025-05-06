@@ -30,4 +30,14 @@ class MainViewModel(private val dao: TaskHalderDao): ViewModel() {
     fun getTaskHalder(id: Long): TaskHalder? {
         return null
     }
+
+    fun delete(id: Long) {
+        viewModelScope.launch(Dispatchers.IO) {
+            dao.deleteTaskHalderById(id)
+        }
+    }
+
+    suspend fun getHalder(id: Long): TaskHalder? {
+        return dao.getTaskHalder(id)
+    }
 }

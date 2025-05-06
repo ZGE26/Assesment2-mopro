@@ -10,9 +10,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DividerDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -25,6 +28,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,6 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -41,6 +46,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.assesment2.R
 import com.example.assesment2.model.TaskList
 import com.example.assesment2.util.ViewModelFactory
 
@@ -54,11 +60,19 @@ fun ListTask(navController: NavHostController, id: Long) {
     val newTaskData = remember {
         mutableStateOf(TaskList(id = 0, title = "", description = "", date = "", halderId = id))
     }
+    var title by remember { mutableStateOf("") }
 
     val context = LocalContext.current
     val factory = ViewModelFactory(context)
     val viewModel: ListViewModel = viewModel(factory = factory)
     val taskList by viewModel.listTaskList.collectAsState()
+    val viewModel2: MainViewModel = viewModel(factory = factory)
+
+    LaunchedEffect(Unit) {
+        if(id == 0L) return@LaunchedEffect
+        val halder = viewModel2.getHalder(id)?: return@LaunchedEffect
+        title = halder.title
+    }
 
     Scaffold(
         topBar = {
@@ -73,12 +87,20 @@ fun ListTask(navController: NavHostController, id: Long) {
                     }
                 },
                 title = {
-                    Text(text = "ID Task: $id")
+                    Text(title)
                 },
                 colors = TopAppBarDefaults.mediumTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.primary
                 ),
+                actions = {
+                    DeleteActionList {
+                        viewModel.deleteAll(id)
+                        viewModel2.delete(id)
+                        navController.popBackStack()
+                    }
+                }
+
             )
         }
     ) { paddingValues ->
@@ -107,7 +129,8 @@ fun ListTask(navController: NavHostController, id: Long) {
                 onClick = {
                     viewModel.update(tempTask)
                     selectedTask.value = null
-                }
+                },
+                viewModel = viewModel
             )
         }
 
@@ -129,7 +152,8 @@ fun ListTask(navController: NavHostController, id: Long) {
                         )
                         newTaskDialogVisible.value = false
                     }
-                }
+                },
+                viewModel = viewModel
             )
         }
     }
@@ -219,7 +243,8 @@ fun DetailList(
     onTitleChange: (String) -> Unit = {},
     onDescriptionChange: (String) -> Unit = {},
     onDateChange: (String) -> Unit = {},
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
+    viewModel: ListViewModel
 ) {
     Dialog(
         onDismissRequest = onDismiss,
@@ -263,6 +288,12 @@ fun DetailList(
                                     contentDescription = "Save",
                                     tint = MaterialTheme.colorScheme.primary
                                 )
+                            }
+                            if(task.id != 0L) {
+                                DeleteActionList {
+                                    viewModel.deleteList(task.id)
+                                    onDismiss()
+                                }
                             }
                         },
                         colors = TopAppBarDefaults.mediumTopAppBarColors(
@@ -318,6 +349,32 @@ fun DetailList(
     }
 }
 
+@Composable
+fun DeleteActionList(delete: () -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+
+    IconButton(onClick = {expanded = true}) {
+        Icon(
+            imageVector = Icons.Filled.MoreVert,
+            contentDescription = stringResource(R.string.hapus),
+            tint = MaterialTheme.colorScheme.primary
+        )
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+        ) {
+            DropdownMenuItem(
+                text = {
+                    Text(stringResource(R.string.hapus))
+                },
+                onClick = {
+                    delete()
+                    expanded = false
+                },
+            )
+        }
+    }
+}
 
 @Preview
 @Composable
