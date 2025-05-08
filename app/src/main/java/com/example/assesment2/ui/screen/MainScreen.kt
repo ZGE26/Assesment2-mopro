@@ -107,7 +107,7 @@ fun MainScreen(navController: NavHostController) {
                                     if (showList) R.drawable.baseline_grid_view_24
                                     else R.drawable.baseline_format_list_bulleted_24
                                 ),
-                                contentDescription = "Tukar Tampilan"
+                                contentDescription = stringResource(R.string.Tampilan)
                             )
                         }
                     }
@@ -121,7 +121,7 @@ fun MainScreen(navController: NavHostController) {
                             onClick = { showDialog = true },
                             containerColor = MaterialTheme.colorScheme.secondary
                         ) {
-                            Icon(Icons.Filled.Create, contentDescription = "Tambah Catatan")
+                            Icon(Icons.Filled.Create, contentDescription = stringResource(R.string.tambah_task))
                         }
                     }
 
@@ -168,12 +168,12 @@ fun ScreenContent(modifier: Modifier, navController: NavHostController, data: Li
         OutlinedTextField(
             value = searchQuery,
             onValueChange = { searchQuery = it },
-            label = { Text("Cari tugas...") },
+            label = { Text(stringResource(R.string.cari_task)) },
             singleLine = true,
             trailingIcon = {
                 Icon(
                     painter = painterResource(R.drawable.baseline_search_24),
-                    contentDescription = "Search"
+                    contentDescription = stringResource(R.string.cari_task),
                 )
             },
             shape = RoundedCornerShape(percent = 50),
@@ -195,7 +195,7 @@ fun ScreenContent(modifier: Modifier, navController: NavHostController, data: Li
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("Data tidak ditemukan")
+                Text(stringResource(R.string.invalid_data))
             }
         } else {
             LazyColumn(
@@ -228,7 +228,7 @@ fun ListTask(taskHalder: TaskHalder, onClick: () -> Unit = {}) {
     ) {
         Icon(
             painter = painterResource(R.drawable.baseline_notes_24),
-            contentDescription = "Avatar",
+            contentDescription = stringResource(R.string.avatar),
             modifier = Modifier
                 .size(48.dp)
                 .padding(8.dp),

@@ -1,9 +1,13 @@
 package com.example.assesment2.ui.screen
 
+import android.icu.util.Calendar
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -17,9 +21,12 @@ import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -31,6 +38,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -48,10 +56,17 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.assesment2.R
 import com.example.assesment2.model.TaskList
+import com.example.assesment2.ui.component.DialogInfo
 import com.example.assesment2.util.ViewModelFactory
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
+
 
 const val KEY_ID_TASK = "taskId"
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListTask(navController: NavHostController, id: Long) {
@@ -81,7 +96,7 @@ fun ListTask(navController: NavHostController, id: Long) {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.kembali),
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
@@ -175,7 +190,7 @@ fun ListTaskContent(
 
         if (filteredTasks.isEmpty()) {
             Text(
-                text = "List belum ada.",
+                text = stringResource(R.string.invalid_list),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(16.dp)
@@ -195,7 +210,7 @@ fun ListTaskContent(
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
         ) {
             Text(
-                text = "Tambah Task",
+                text = stringResource(R.string.tambah_list),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -235,6 +250,108 @@ fun GridItem(taskList: TaskList, onClick: () -> Unit) {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun CustomDatePicker(
+    selectedDate: Calendar,
+    onDateChange: (Calendar) -> Unit
+) {
+    var day by remember { mutableIntStateOf(selectedDate.get(Calendar.DAY_OF_MONTH)) }
+    var month by remember { mutableIntStateOf(selectedDate.get(Calendar.MONTH)) }
+    var year by remember { mutableIntStateOf(selectedDate.get(Calendar.YEAR)) }
+
+    val days = (1..31).toList()
+    val months = (1..12).toList()
+    val years = (2000..Calendar.getInstance().get(Calendar.YEAR) + 10).toList()
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+
+            DropdownSelector(
+                label = stringResource(R.string.hari),
+                options = days,
+                selected = day,
+                onSelected = {
+                    day = it
+                    selectedDate.set(year, month, it)
+                    onDateChange(selectedDate)
+                },
+                modifier = Modifier.weight(1f).padding(end = 4.dp)
+            )
+
+            DropdownSelector(
+                label = stringResource(R.string.bulan),
+                options = months,
+                selected = month + 1,
+                onSelected = {
+                    month = it - 1
+                    selectedDate.set(year, month, day)
+                    onDateChange(selectedDate)
+                },
+                modifier = Modifier.weight(1f).padding(horizontal = 4.dp)
+            )
+
+            DropdownSelector(
+                label = stringResource(R.string.tahun),
+                options = years,
+                selected = year,
+                onSelected = {
+                    year = it
+                    selectedDate.set(year, month, day)
+                    onDateChange(selectedDate)
+                },
+                modifier = Modifier.weight(1f).padding(start = 4.dp)
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DropdownSelector(
+    label: String,
+    options: List<Int>,
+    selected: Int,
+    onSelected: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+        modifier = modifier
+    ) {
+        OutlinedTextField(
+            value = selected.toString(),
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(label) },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryEditable, enabled = true).fillMaxWidth()
+        )
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            options.forEach { value ->
+                DropdownMenuItem(
+                    text = { Text(value.toString()) },
+                    onClick = {
+                        onSelected(value)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailList(
@@ -261,6 +378,22 @@ fun DetailList(
             var isTitleError by remember { mutableStateOf(false) }
             var isDescriptionError by remember { mutableStateOf(false) }
 
+            val calendar = remember {
+                Calendar.getInstance().apply {
+                    if (task.date.isBlank()) {
+                        val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                        task.date = formatter.format(Date())
+                    } else {
+                        try {
+                            val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                            time = formatter.parse(task.date) ?: Date()
+                        } catch (_: Exception) {
+                            time = Date()
+                        }
+                    }
+                }
+            }
+
             Scaffold(
                 topBar = {
                     TopAppBar(
@@ -269,7 +402,7 @@ fun DetailList(
                             IconButton(onClick = onDismiss) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = "Back",
+                                    contentDescription = stringResource(R.string.kembali),
                                     tint = MaterialTheme.colorScheme.primary
                                 )
                             }
@@ -285,11 +418,11 @@ fun DetailList(
                             }) {
                                 Icon(
                                     imageVector = Icons.Filled.Check,
-                                    contentDescription = "Save",
+                                    contentDescription = stringResource(R.string.simpan),
                                     tint = MaterialTheme.colorScheme.primary
                                 )
                             }
-                            if(task.id != 0L) {
+                            if (task.id != 0L) {
                                 DeleteActionList {
                                     viewModel.deleteList(task.id)
                                     onDismiss()
@@ -321,7 +454,7 @@ fun DetailList(
                             isTitleError = false
                             onTitleChange(it)
                         },
-                        label = { Text("Judul") },
+                        label = { Text(stringResource(R.string.judul)) },
                         isError = isTitleError,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -332,16 +465,19 @@ fun DetailList(
                             isDescriptionError = false
                             onDescriptionChange(it)
                         },
-                        label = { Text("Deskripsi") },
+                        label = {
+                            Text(stringResource(R.string.desc))
+                        },
                         isError = isDescriptionError,
                         modifier = Modifier.fillMaxWidth()
                     )
 
-                    OutlinedTextField(
-                        value = task.date,
-                        onValueChange = { onDateChange(it) },
-                        label = { Text("Tanggal") },
-                        modifier = Modifier.fillMaxWidth()
+                    CustomDatePicker(
+                        selectedDate = calendar,
+                        onDateChange = { newDate ->
+                            val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                            onDateChange(formatter.format(newDate.time))
+                        }
                     )
                 }
             }
@@ -349,11 +485,14 @@ fun DetailList(
     }
 }
 
+
+
 @Composable
 fun DeleteActionList(delete: () -> Unit) {
     var expanded by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(false) }
 
-    IconButton(onClick = {expanded = true}) {
+    IconButton(onClick = { expanded = true }) {
         Icon(
             imageVector = Icons.Filled.MoreVert,
             contentDescription = stringResource(R.string.hapus),
@@ -368,14 +507,27 @@ fun DeleteActionList(delete: () -> Unit) {
                     Text(stringResource(R.string.hapus))
                 },
                 onClick = {
-                    delete()
+                    showDialog = true
                     expanded = false
                 },
             )
         }
     }
+
+    if (showDialog) {
+        DialogInfo(
+            title = stringResource(R.string.hapus),
+            message = stringResource(R.string.pesan_hapus),
+            onDismiss = { showDialog = false },
+            onConfirmation = {
+                delete()
+                showDialog = false
+            }
+        )
+    }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview
 @Composable
 fun ListTaskPreview() {

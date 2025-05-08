@@ -2,4 +2,20 @@
     <string name="app_name">Task Manager</string>
     <string name="invalid">Data Tidak Boleh Kosong</string>
     <string name="hapus">Hapus Task</string>
+    <string name="Tampilan">Tukar Tampian</string>
+    <string name="tambah_task">Tambah Task</string>
+    <string name="cari_task">Cari Task</string>
+    <string name="cari">Cari</string>
+    <string name="invalid_data">Data tidak ditemuka</string>
+    <string name="avatar">Avatar</string>
+    <string name="kembali">Kembali</string>
+    <string name="invalid_list">List belum ada.</string>
+    <string name="tambah_list">"Tambah List</string>
+    <string name="hari">Hari</string>
+    <string name="bulan">Hari</string>
+    <string name="tahun">Hari</string>
+    <string name="simpan">Simpan</string>
+    <string name="judul">Judul</string>
+    <string name="desc">Deskripsi</string>
+    <string name="pesan_hapus">Apakah anda yakin ingin menghapus task ini?</string>
 </resources>
